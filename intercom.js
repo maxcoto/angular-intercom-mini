@@ -4,57 +4,64 @@
  * License: MIT
  */
 
-// TODO - refactor the obfuscated JS.
+!function(module, angular, undefined) {
+  'use strict';
 
-angular.module('angular-intercom', []).factory('$intercom', ['$window', function ($window) {
-  return {
-    init: function(app_id, user) {
-      $window.intercomSettings = {
-        app_id: app_id,
-        name: user.name,
-        email: user.email,
-        created_at: Math.round(+new Date(user.created_at)/1000)
+  angular.module('ngIntercom', ['intercom']);
+
+  module.value('IntercomSettings', {});
+
+  module.provider('IntercomService', function() {
+    function createScript($document, callback) {
+      var scriptTag = $document.createElement('script');
+      scriptTag.type = 'text/javascript';
+      scriptTag.async = true;
+      scriptTag.src = 'https://static.intercomcdn.com/intercom.v1.js';
+      scriptTag.onreadystatechange = function () {
+        if (this.readyState === 'complete') {
+          callback();
+        }
+      };
+      scriptTag.onload = callback;
+      var s = $document.getElementsByTagName('body')[0];
+      s.appendChild(scriptTag);
+    }
+
+    this.$get = ['$document', '$timeout', '$q', '$window',
+      function($document, $timeout, $q, $window) {
+        var deferred = $q.defer();
+        var onScriptLoad = function(callback) {
+          $timeout(function(){
+            deferred.resolve($window.Intercom);
+          });
+        };
+        createScript($document[0], onScriptLoad);
+        return deferred.promise;
+      }
+    ];
+  });
+
+  module.provider('Intercom', function() {
+
+    var appID = null;
+    this.init = function(_appID) {
+      appID = _appID;
+    };
+
+    this.$get = ['IntercomService', 'IntercomSettings', function(IntercomService, IntercomSettings) {
+      var _options = {};
+      angular.extend(_options, IntercomSettings, { app_id: appID });
+      console.log(_options);
+
+      return {
+        boot: function(options) {
+          IntercomService.then(function(intercom) {
+            intercom('boot', options || _options);
+          });
+        }
       };
 
-      var w = $window;
-      var ic = w.Intercom;
+    }];
+  });
 
-      if( typeof ic === "function" ) {
-        ic('reattach_activator');
-        ic('update', intercomSettings);
-      } else {
-
-        var d = $window.document;
-        
-        var i = function() {
-          i.c(arguments);
-        };
-        
-        i.q = [];
-        
-        i.c = function(args) {
-          i.q.push(args);
-        };
-        
-        w.Intercom = i;
-
-        var l = function(){
-          var s = d.createElement('script');
-          s.type='text/javascript';
-          s.async=true;
-          s.src='https://static.intercomcdn.com/intercom.v1.js';
-          var x = d.getElementsByTagName('script')[0];
-          x.parentNode.insertBefore(s,x);
-        };
-
-        l();
-        if( w.attachEvent ){
-          w.attachEvent('onload', l);
-        } else {
-          w.addEventListener('load', l, false);
-        }
-      }
-    }
-  };
-
-}]);
+}(angular.module('intercom',[]), angular);
