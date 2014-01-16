@@ -27,11 +27,11 @@
 
     angular.module('intercomApp', ['intercom'])
 
-    .config(function(IntercomProvider) {
+    .config(['IntercomProvider', function(IntercomProvider) {
       IntercomProvider.init('YOUR-APP-ID');
-    })
+    }])
 
-    .directive("intercom", function(Intercom) {
+    .directive("intercom", ['Intercom', function(Intercom) {
       return {
         link: function(scope, element, attrs) {
           scope.$watch('user', function(user) {
@@ -50,7 +50,7 @@
           });
         }
       };
-    });
+    }]);
   </script>
 
 </body>
