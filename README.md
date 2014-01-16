@@ -18,10 +18,11 @@ Bower Component for installing and using Intercom with AngularJS.
 <script>
   angular
   	.module('YOUR-APP', ['intercom', '... others ...'])
-  	.config( function(IntercomProvider) { IntercomProvider.init('YOUR-APP-ID') })
-  	.directive('intercom', function(Intercom) {
+  	.config(['IntercomProvider', function(IntercomProvider) { IntercomProvider.init('YOUR-APP-ID') }])
+  	.directive('intercom', ['Intercom', function(Intercom) {
   	  // Create a directive to watch user object and invoke Intercom.boot when it changes
-  	})
+  	  // There is a example of a directive in example.html file
+  	}])
   ;
 </script>
 
