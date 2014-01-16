@@ -44,19 +44,18 @@
   module.provider('Intercom', function() {
 
     var appID = null;
-    this.init = function(_appID) {
-      appID = _appID;
-    };
+    this.init = function(_appID) { appID = _appID };
 
     this.$get = ['IntercomService', 'IntercomSettings', function(IntercomService, IntercomSettings) {
       var _options = {};
-      angular.extend(_options, IntercomSettings, { app_id: appID });
-      console.log(_options);
+      angular.extend(_options, IntercomSettings);
 
       return {
         boot: function(options) {
           IntercomService.then(function(intercom) {
-            intercom('boot', options || _options);
+            options = options || _options;
+            angular.extend(options, { app_id: appID });
+            intercom('boot', options);
           });
         }
       };
