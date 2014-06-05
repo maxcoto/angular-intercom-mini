@@ -1,5 +1,5 @@
 /*
- * angular-intercom service v0.0.0
+ * angular-intercom service v0.0.1
  * (c) 2013 Maximiliano Perez Coto http://about.me/maxiperezc
  * License: MIT
  */
@@ -12,7 +12,7 @@
   module.value('IntercomSettings', {});
 
   module.provider('IntercomService', function() {
-    function createScript($document, callback) {
+    var createScript = function ($document, callback) {
       var scriptTag = $document.createElement('script');
       scriptTag.type = 'text/javascript';
       scriptTag.async = true;
@@ -25,13 +25,25 @@
       scriptTag.onload = callback;
       var s = $document.getElementsByTagName('body')[0];
       s.appendChild(scriptTag);
-    }
+    };
+
+    var intercomBootstrap = function () {
+      var Intercom = function(){
+        Intercom.c(arguments)
+      };
+      Intercom.q = [];
+      Intercom.c = function(args){
+        Intercom.q.push(args)
+      };
+      return Intercom;
+    };
 
     this.$get = ['$document', '$timeout', '$q', '$window',
       function($document, $timeout, $q, $window) {
         var deferred = $q.defer();
         var onScriptLoad = function(callback) {
           $timeout(function(){
+            $window.Intercom = intercomBootstrap();
             deferred.resolve($window.Intercom);
           });
         };
