@@ -60,6 +60,8 @@
 
     this.$get = ['IntercomService', 'IntercomSettings', function(IntercomService, IntercomSettings) {
       var _options = {};
+      var intercomObj = false;
+
       angular.extend(_options, IntercomSettings);
 
       return {
@@ -67,8 +69,18 @@
           IntercomService.then(function(intercom) {
             options = options || _options;
             angular.extend(options, { app_id: appID });
+
             intercom('boot', options);
+            intercomObj = intercom;
           });
+        },
+
+        track: function(eventName, options) {
+          if (!intercomObj) {
+            return;
+          }
+
+          intercomObj('trackEvent', eventName, options);
         }
       };
 
