@@ -68,6 +68,15 @@
       var intercomObj = false;
 
       angular.extend(_options, IntercomSettings);
+      var invoke = function(){
+         if (!intercomObj){
+           return;
+         }
+        var args = Array.prototype.slice.call(arguments).reverse();
+        var call = args.pop()
+        intercomObj[call].call(undefined, args);
+      };
+
 
       return {
         boot: function(options) {
@@ -81,12 +90,42 @@
         },
 
         track: function(eventName, options) {
-          if (!intercomObj) {
-            return;
-          }
+          invoke('trackEvent', [eventName, options]);
+        },
 
-          intercomObj('trackEvent', eventName, options);
-        }
+        shutdown: function(){
+          invoke('shutdown');
+        },
+
+        update: function(arg){
+          invoke('update', arg);
+        },
+
+        reattach_activator: function(){
+          invoke('reattach_activator');
+        },
+
+        hide: function(){
+          invoke('hide');
+        },
+
+        show: function(){
+          invoke('show');
+        },
+
+        onShow: function(cb){
+          invoke('onShow', cb);
+        },
+
+        onHide: function(cb){
+          invoke('onHide', cb);
+        },
+
+        onActivatorClick: function(cb){
+          invoke('onActivatorClick');
+        },
+
+        invoke: invoke
       };
 
     }];
