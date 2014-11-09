@@ -72,9 +72,7 @@
          if (!intercomObj){
            return;
          }
-        var args = Array.prototype.slice.call(arguments).reverse();
-        var call = args.pop()
-        intercomObj[call].call(undefined, args);
+        intercomObj.apply(undefined, arguments);
       };
 
 
@@ -90,7 +88,7 @@
         },
 
         track: function(eventName, options) {
-          invoke('trackEvent', [eventName, options]);
+          invoke('trackEvent', eventName, options);
         },
 
         shutdown: function(){
