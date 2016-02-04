@@ -77,13 +77,17 @@
 
 
       return {
-        boot: function(options) {
+        boot: function(options, callback) {
           IntercomService.init(appID).then(function(intercom) {
             options = options || _options;
             angular.extend(options, { app_id: appID });
 
             intercom('boot', options);
             intercomObj = intercom;
+
+            if(typeof callback === 'function') {
+              callback();
+            }
           });
         },
 
