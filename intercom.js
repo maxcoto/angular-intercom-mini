@@ -38,17 +38,20 @@
       return Intercom;
     };
 
-    this.$get = ['$document', '$timeout', '$q', '$window',
-      function($document, $timeout, $q, $window) {
+    this.$get = ['$document', '$interval', '$q', '$window',
+      function($document, $interval, $q, $window) {
         return {
           init: function(appId) {
             var deferred = $q.defer();
             $window.Intercom = intercomBootstrap();
-
-            var onScriptLoad = function(callback) {
-              $timeout(function(){
-                deferred.resolve($window.Intercom);
-              });
+            var firstIntercom = $window.Intercom;
+            var onScriptLoad = function() {
+              $interval(function(){
+                if($window.Intercom !== firstIntercom) {
+                  deferred.resolve($window.Intercom);
+                  $interval.cancel(onScriptLoad);
+                }
+              },200);
             };
             createScript($document[0], appId, onScriptLoad);
             return deferred.promise;
@@ -69,9 +72,9 @@
 
       angular.extend(_options, IntercomSettings);
       var invoke = function(){
-         if (!intercomObj){
-           return;
-         }
+        if (!intercomObj){
+          return;
+        }
         intercomObj.apply(undefined, arguments);
       };
 
